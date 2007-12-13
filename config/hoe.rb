@@ -4,7 +4,7 @@ AUTHOR = 'Keith Rarick'  # can also be an array of Authors
 EMAIL = 'kr@essembly.com'
 DESCRIPTION = 'Ruby client library for the Beanstalk protocol'
 GEM_NAME = 'beanstalk-client' # what ppl will type to install your gem
-RUBYFORGE_PROJECT = 'beanstalk-client' # The unix name for your project
+RUBYFORGE_PROJECT = 'beanstalk' # The unix name for your project
 HOMEPATH = "http://#{RUBYFORGE_PROJECT}.rubyforge.org"
 DOWNLOAD_PATH = "http://rubyforge.org/projects/#{RUBYFORGE_PROJECT}"
 
