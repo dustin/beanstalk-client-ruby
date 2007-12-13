@@ -215,15 +215,15 @@ module Beanstalk
       @connections.values()
     end
 
-    def put(body, pri=65536)
-      pick_connection.put(body, pri)
+    def put(body, pri=65536, delay=0)
+      pick_connection.put(body, pri, delay)
     rescue EOFError, Errno::ECONNRESET
       connect()
       retry
     end
 
-    def yput(obj, pri=65536)
-      pick_connection.yput(obj, pri)
+    def yput(obj, pri=65536, delay=0)
+      pick_connection.yput(obj, pri, delay)
     rescue EOFError, Errno::ECONNRESET
       connect()
       retry
