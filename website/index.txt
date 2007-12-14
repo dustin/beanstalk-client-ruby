@@ -7,14 +7,21 @@ h2. What
 
 This is a Ruby client library for the Beanstalk protocol.
 
-<tt>beanstalkd</tt> is a fast, distributed, in-memory work-queue service. Its
-interface is generic, but is intended for use in reducing the latency of page
-views in high-volume web applications by running most time-consuming tasks
-asynchronously.
+"<tt>beanstalkd</tt>":http://xph.us/software/beanstalkd/ is a fast,
+distributed, in-memory work-queue service. Its interface is generic, but is
+intended for use in reducing the latency of page views in high-volume web
+applications by running most time-consuming tasks asynchronously.
 
 h2. Installing
 
+<p>First you must download and install the 
+"<tt>beanstalkd</tt>":http://xph.us/software/beanstalkd/ server.</p>
+
+<p>Then just:</p>
+
 <pre syntax="sh">sudo gem install beanstalk-client</pre>
+
+<p>and you're ready to go!</p>
 
 h2. How to use it
 
