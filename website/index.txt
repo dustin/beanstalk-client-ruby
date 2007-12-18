@@ -49,8 +49,9 @@ end
 h2. Rails Integration
 
 But you very likely want to use this in a Rails project. In that case, you
-should check out the Async Observer Rails plugin. It gives far more
-functionality and a super-easy-to-use interface.
+should check out the <a href=http://async-observer.rubyforge.org/>Async
+Observer Rails plugin</a>. It gives far more functionality and a
+super-easy-to-use interface.
 
 h2. Forum
 
