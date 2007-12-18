@@ -35,14 +35,14 @@ module Beanstalk
       @socket.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
     end
 
-    def put(body, pri=65536, delay=0)
-      @socket.write("put #{pri} #{delay} #{body.size}\r\n#{body}\r\n")
+    def put(body, pri=65536, delay=0, ttr=120)
+      @socket.write("put #{pri} #{delay} #{ttr} #{body.size}\r\n#{body}\r\n")
       check_resp('INSERTED')
       :ok
     end
 
-    def yput(obj, pri=65536, delay=0)
-      put(YAML.dump(obj), pri, delay)
+    def yput(obj, pri=65536, delay=0, ttr=120)
+      put(YAML.dump(obj), pri, delay, ttr)
     end
 
     def peek()
@@ -215,15 +215,15 @@ module Beanstalk
       @connections.values()
     end
 
-    def put(body, pri=65536, delay=0)
-      pick_connection.put(body, pri, delay)
+    def put(body, pri=65536, delay=0, ttr=120)
+      pick_connection.put(body, pri, delay, ttr)
     rescue EOFError, Errno::ECONNRESET
       connect()
       retry
     end
 
-    def yput(obj, pri=65536, delay=0)
-      pick_connection.yput(obj, pri, delay)
+    def yput(obj, pri=65536, delay=0, ttr=120)
+      pick_connection.yput(obj, pri, delay, ttr)
     rescue EOFError, Errno::ECONNRESET
       connect()
       retry
