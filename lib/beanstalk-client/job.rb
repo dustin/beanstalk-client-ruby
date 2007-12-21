@@ -31,10 +31,12 @@ class Beanstalk::Job
     @id = id
     @pri = pri
     @body = body
+    @deleted = false
   end
 
   def delete()
-    @conn.delete(id)
+    @conn.delete(id) if !@deleted
+    @deleted = true
   end
 
   def put_back(pri=self.pri)
