@@ -20,6 +20,16 @@ require 'yaml'
 class Beanstalk::Job
   attr_reader :id, :pri, :body, :conn
 
+  # Convenience method for getting ybody elements.
+  def [](name)
+    ybody[name]
+  end
+
+  # Convenience method for setting ybody elements.
+  def []=(name, val)
+    ybody[name] = val
+  end
+
   # Return the object that results from loading the body as a yaml stream.
   # Return nil if the body is not a valid yaml stream.
   def ybody()
