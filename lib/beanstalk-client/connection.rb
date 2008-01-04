@@ -99,10 +99,12 @@ module Beanstalk
       r[0...-2]
     end
 
-    def check_resp(word)
+    def check_resp(*words)
       r = get_resp()
       rword, *vals = r.split(/\s+/)
-      raise UnexpectedResponse.new(r) if word and rword != word
+      if (words.size > 0) and !words.include?(rword)
+        raise UnexpectedResponse.new(r)
+      end
       vals
     end
 
