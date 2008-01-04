@@ -65,6 +65,9 @@ Read the "8 steps for fixing other people's code":http://drnicwilliams.com/2007/
 
 The repository is <code>http://xph.us/src/beanstalk-client-ruby.git</code> for anonymous access.
 
+You can browse the repo at
+"http://xph.us/git/beanstalk-client-ruby/":http://xph.us/git/beanstalk-client-ruby/.
+
 h2. License
 
 You can share this code under the terms of the GPL version 3. 
