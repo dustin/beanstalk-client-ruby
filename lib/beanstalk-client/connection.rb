@@ -37,7 +37,7 @@ module Beanstalk
 
     def put(body, pri=65536, delay=0, ttr=120)
       @socket.write("put #{pri} #{delay} #{ttr} #{body.size}\r\n#{body}\r\n")
-      check_resp('INSERTED')[0].to_i
+      check_resp('INSERTED', 'BURIED')[0].to_i
     end
 
     def yput(obj, pri=65536, delay=0, ttr=120)
