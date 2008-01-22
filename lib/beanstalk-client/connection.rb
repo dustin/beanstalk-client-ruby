@@ -183,7 +183,7 @@ module Beanstalk
     def method_missing(selector, *args, &block)
       begin
         @conn.send(selector, *args, &block)
-      rescue EOFError, Errno::ECONNRESET => ex
+      rescue EOFError, Errno::ECONNRESET, Errno::EPIPE, UnexpectedResponse => ex
         @multi.remove(@conn)
         raise ex
       end
@@ -218,21 +218,30 @@ module Beanstalk
 
     def put(body, pri=65536, delay=0, ttr=120)
       pick_connection.put(body, pri, delay, ttr)
-    rescue EOFError, Errno::ECONNRESET
+    rescue DrainingError
+      # Don't reconnect -- we're not interested in this server
+      retry
+    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
       connect()
       retry
     end
 
     def yput(obj, pri=65536, delay=0, ttr=120)
       pick_connection.yput(obj, pri, delay, ttr)
-    rescue EOFError, Errno::ECONNRESET
+    rescue DrainingError
+      # Don't reconnect -- we're not interested in this server
+      retry
+    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
       connect()
       retry
     end
 
     def reserve()
       pick_connection.reserve()
-    rescue EOFError, Errno::ECONNRESET
+    rescue DrainingError
+      # Don't reconnect -- we're not interested in this server
+      retry
+    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
       connect()
       retry
     end

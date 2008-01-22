@@ -23,6 +23,15 @@ module Beanstalk
   attr_accessor :select
 
   class UnexpectedResponse < RuntimeError
+    def self.new(word)
+      if self == UnexpectedResponse and word == 'DRAINING'
+        return DrainingError.new(nil)
+      end
+      super(word)
+    end
+  end
+
+  class DrainingError < UnexpectedResponse
   end
 end
 
