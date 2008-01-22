@@ -8,6 +8,7 @@ config/requirements.rb
 lib/beanstalk-client.rb
 lib/beanstalk-client/bag.rb
 lib/beanstalk-client/connection.rb
+lib/beanstalk-client/errors.rb
 lib/beanstalk-client/job.rb
 lib/beanstalk-client/version.rb
 log/debug.log
