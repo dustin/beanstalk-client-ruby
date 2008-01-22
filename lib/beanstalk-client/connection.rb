@@ -262,7 +262,7 @@ module Beanstalk
     private
 
     def pick_connection()
-      open_connections[rand(open_connections.size)] or raise 'not connected'
+      open_connections[rand(open_connections.size)] or raise NotConnected
     end
   end
 end
