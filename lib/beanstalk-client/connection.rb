@@ -217,34 +217,26 @@ module Beanstalk
       @connections.values()
     end
 
-    def put(body, pri=65536, delay=0, ttr=120)
-      pick_connection.put(body, pri, delay, ttr)
+    def send_to_conn(sel, *args)
+      pick_connection.send(sel, *args)
     rescue DrainingError
       # Don't reconnect -- we're not interested in this server
       retry
     rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
       connect()
       retry
+    end
+
+    def put(body, pri=65536, delay=0, ttr=120)
+      send_to_conn(:put, body, pri, delay, ttr)
     end
 
     def yput(obj, pri=65536, delay=0, ttr=120)
-      pick_connection.yput(obj, pri, delay, ttr)
-    rescue DrainingError
-      # Don't reconnect -- we're not interested in this server
-      retry
-    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
-      connect()
-      retry
+      send_to_conn(:yput, obj, pri, delay, ttr)
     end
 
     def reserve()
-      pick_connection.reserve()
-    rescue DrainingError
-      # Don't reconnect -- we're not interested in this server
-      retry
-    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
-      connect()
-      retry
+      send_to_conn(:reserve)
     end
 
     def raw_stats()
