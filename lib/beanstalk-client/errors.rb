@@ -1,4 +1,4 @@
-# beanstalk-client.rb - client library for beanstalk
+# beanstalk-client/errors.rb - client library for beanstalk
 
 # Copyright (C) 2007 Philotic Inc.
 
@@ -15,12 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-$:.unshift(File.dirname(__FILE__))
-
 module Beanstalk
-  extend self
 
-  attr_accessor :select
+  class UnexpectedResponse < RuntimeError
+    def self.new(word)
+      if self == UnexpectedResponse and word == 'DRAINING'
+        return DrainingError.new(nil)
+      end
+      super(word)
+    end
+  end
+
+  class DrainingError < UnexpectedResponse
+  end
 end
-
-require 'beanstalk-client/connection'

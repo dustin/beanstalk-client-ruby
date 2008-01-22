@@ -19,6 +19,7 @@ require 'socket'
 require 'fcntl'
 require 'yaml'
 require 'beanstalk-client/bag'
+require 'beanstalk-client/errors'
 require 'beanstalk-client/job'
 
 module Beanstalk
