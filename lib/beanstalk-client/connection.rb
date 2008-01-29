@@ -217,8 +217,12 @@ module Beanstalk
       @connections.values()
     end
 
+    def last_server
+      @last_conn.addr
+    end
+
     def send_to_conn(sel, *args)
-      pick_connection.send(sel, *args)
+      (@last_conn = pick_connection).send(sel, *args)
     rescue DrainingError
       # Don't reconnect -- we're not interested in this server
       retry
