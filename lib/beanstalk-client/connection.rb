@@ -29,11 +29,20 @@ module Beanstalk
     def initialize(addr, jptr=self)
       @addr = addr
       @jptr = jptr
+      connect
+    end
+
+    def connect
       host, port = addr.split(':')
       @socket = TCPSocket.new(host, port.to_i)
 
       # Don't leak fds when we exec.
       @socket.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
+    end
+
+    def close
+      @socket.close
+      @socket = nil
     end
 
     def put(body, pri=65536, delay=0, ttr=120)
@@ -253,6 +262,13 @@ module Beanstalk
 
     def remove(conn)
       @connections.delete(conn.addr)
+    end
+
+    def close
+      while @connections.size > 0
+        addr, conn = @connections.pop
+        conn.close
+      end
     end
 
     def peek()
