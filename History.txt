@@ -1,3 +1,8 @@
+== 0.7.0 2008-02-01
+
+* Add a close method to connections and pools.
+* Add a last_server method to identify the last connection used.
+
 == 0.6.1 2008-01-22
 
 * More useful behavior when we lose the connection or the server is in drain
