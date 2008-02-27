@@ -91,6 +91,21 @@ module Beanstalk
       :ok
     end
 
+    def use(tube)
+      @socket.write("use #{tube}\r\n")
+      check_resp('USING')[0]
+    end
+
+    def watch(tube)
+      @socket.write("watch #{tube}\r\n")
+      check_resp('WATCHING')[0]
+    end
+
+    def ignore(tube)
+      @socket.write("ignore #{tube}\r\n")
+      check_resp('WATCHING')[0]
+    end
+
     def stats()
       @socket.write("stats\r\n")
       read_yaml('OK')
@@ -248,6 +263,18 @@ module Beanstalk
 
     def reserve()
       send_to_rand_conn(:reserve)
+    end
+
+    def use(tube)
+      send_to_all_conns(:use, tube)
+    end
+
+    def watch(tube)
+      send_to_all_conns(:watch, tube)
+    end
+
+    def ignore(tube)
+      send_to_all_conns(:ignore, tube)
     end
 
     def raw_stats()
