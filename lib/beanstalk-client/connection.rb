@@ -97,7 +97,7 @@ module Beanstalk
     end
 
     def job_stats(id)
-      @socket.write("stats #{id}\r\n")
+      @socket.write("stats-job #{id}\r\n")
       read_yaml('OK')
     end
 
@@ -122,10 +122,10 @@ module Beanstalk
       # Give the user a chance to select on multiple fds.
       Beanstalk.select.call([@socket]) if Beanstalk.select
 
-      id, pri, bytes = check_resp(word).map{|s| s.to_i}
+      id, bytes = check_resp(word).map{|s| s.to_i}
       body = read_bytes(bytes)
       raise 'bad trailer' if read_bytes(2) != "\r\n"
-      [id, pri, body]
+      [id, body]
     end
 
     def read_yaml(word)
@@ -230,34 +230,32 @@ module Beanstalk
       @last_conn.addr
     end
 
-    def send_to_conn(sel, *args)
-      (@last_conn = pick_connection).send(sel, *args)
-    rescue DrainingError
-      # Don't reconnect -- we're not interested in this server
-      retry
-    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
-      connect()
-      retry
+    def send_to_rand_conn(sel, *args)
+      wrap(pick_connection, sel, *args)
+    end
+
+    def send_to_all_conns(sel, *args)
+      make_hash(@connections.map{|a, c| [a, wrap(c, sel, *args)]})
     end
 
     def put(body, pri=65536, delay=0, ttr=120)
-      send_to_conn(:put, body, pri, delay, ttr)
+      send_to_rand_conn(:put, body, pri, delay, ttr)
     end
 
     def yput(obj, pri=65536, delay=0, ttr=120)
-      send_to_conn(:yput, obj, pri, delay, ttr)
+      send_to_rand_conn(:yput, obj, pri, delay, ttr)
     end
 
     def reserve()
-      send_to_conn(:reserve)
+      send_to_rand_conn(:reserve)
     end
 
     def raw_stats()
-      Hash[*@connections.map{|a,c| [a, c.stats()]}.inject([]){|a,b|a+b}]
+      send_to_all_conns(:stats)
     end
 
     def stats()
-      raw_stats.values.inject({}){|sums,h| sums.merge(h) {|k,o,n| o + n}}
+      raw_stats.values.inject({}){|a,b| a.merge(b) {|k,o,n| o + n}}
     end
 
     def remove(conn)
@@ -283,6 +281,20 @@ module Beanstalk
 
     def pick_connection()
       open_connections[rand(open_connections.size)] or raise NotConnected
+    end
+
+    def wrap(conn, sel, *args)
+      (@last_conn = conn).send(sel, *args)
+    rescue DrainingError
+      # Don't reconnect -- we're not interested in this server
+      retry
+    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE
+      connect()
+      retry
+    end
+
+    def make_hash(pairs)
+      Hash[*pairs.inject([]){|a,b|a+b}]
     end
   end
 end

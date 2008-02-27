@@ -18,7 +18,7 @@
 require 'yaml'
 
 class Beanstalk::Job
-  attr_reader :id, :pri, :body, :conn
+  attr_reader :id, :body, :conn
 
   # Convenience method for getting ybody elements.
   def [](name)
@@ -36,10 +36,9 @@ class Beanstalk::Job
     (@ybody ||= [begin YAML.load(body) rescue nil end])[0]
   end
 
-  def initialize(conn, id, pri, body)
+  def initialize(conn, id, body)
     @conn = conn
     @id = id
-    @pri = pri
     @body = body
     @deleted = false
   end
@@ -49,8 +48,8 @@ class Beanstalk::Job
     @deleted = true
   end
 
-  def put_back(pri=self.pri)
-    @conn.put(body, pri)
+  def put_back(pri=self.pri, delay=0, ttr=self.ttr)
+    @conn.put(body, pri, delay, ttr)
   end
 
   def release(newpri=pri, delay=0)
@@ -69,7 +68,9 @@ class Beanstalk::Job
   def time_left() stats['time-left'] end
   def age() stats['age'] end
   def state() stats['state'] end
-  def delay() stats.fetch('delay', 0) end
+  def delay() stats['delay'] end
+  def pri() stats['pri'] end
+  def ttr() stats['ttr'] end
 
   def server()
     @conn.addr
@@ -88,6 +89,6 @@ class Beanstalk::Job
   end
 
   def inspect
-    "(job server=#{server} id=#{id} pri=#{pri} size=#{body.size})"
+    "(job server=#{server} id=#{id} size=#{body.size})"
   end
 end
