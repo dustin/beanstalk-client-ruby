@@ -1,3 +1,10 @@
+== 0.9.0 2008-02-27
+
+* Skipping 0.8.x; beanstalkd 0.8 was a botched release.
+* Protocol updates, support for all new commands and changes to existing
+  commands.
+* Bugfix: don't add stats values that aren't aggregations already.
+
 == 0.7.0 2008-02-01
 
 * Add a close method to connections and pools.
