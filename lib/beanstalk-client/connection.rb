@@ -18,6 +18,7 @@
 require 'socket'
 require 'fcntl'
 require 'yaml'
+require 'set'
 require 'beanstalk-client/bag'
 require 'beanstalk-client/errors'
 require 'beanstalk-client/job'
@@ -365,7 +366,12 @@ module Beanstalk
     end
 
     def sum_hashes(hs)
-      hs.inject({}){|a,b| a.merge(b) {|k,o,n| o + n}}
+      hs.inject({}){|a,b| a.merge(b) {|k,o,n| combine_stats(k, o, n)}}
+    end
+
+    DONT_ADD = Set['name', 'version', 'pid']
+    def combine_stats(k, a, b)
+      DONT_ADD.include?(k) ? Set[a] + Set[b] : a + b
     end
   end
 end
