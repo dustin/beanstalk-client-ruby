@@ -116,6 +116,26 @@ module Beanstalk
       read_yaml('OK')
     end
 
+    def stats_tube(tube)
+      @socket.write("stats-tube #{tube}\r\n")
+      read_yaml('OK')
+    end
+
+    def list_tubes()
+      @socket.write("list-tubes\r\n")
+      read_yaml('OK')
+    end
+
+    def list_tube_used()
+      @socket.write("list-tube-used\r\n")
+      check_resp('USING')[0]
+    end
+
+    def list_tubes_watched()
+      @socket.write("list-tubes-watched\r\n")
+      read_yaml('OK')
+    end
+
     private
 
     def get_resp()
@@ -282,7 +302,27 @@ module Beanstalk
     end
 
     def stats()
-      raw_stats.values.inject({}){|a,b| a.merge(b) {|k,o,n| o + n}}
+      sum_hashes(raw_stats.values)
+    end
+
+    def raw_stats_tube(tube)
+      send_to_all_conns(:stats_tube, tube)
+    end
+
+    def stats_tube(tube)
+      sum_hashes(raw_stats_tube(tube).values)
+    end
+
+    def list_tubes()
+      send_to_all_conns(:list_tubes)
+    end
+
+    def list_tube_used()
+      send_to_all_conns(:list_tube_used)
+    end
+
+    def list_tubes_watched()
+      send_to_all_conns(:list_tubes_watched)
     end
 
     def remove(conn)
@@ -322,6 +362,10 @@ module Beanstalk
 
     def make_hash(pairs)
       Hash[*pairs.inject([]){|a,b|a+b}]
+    end
+
+    def sum_hashes(hs)
+      hs.inject({}){|a,b| a.merge(b) {|k,o,n| o + n}}
     end
   end
 end
