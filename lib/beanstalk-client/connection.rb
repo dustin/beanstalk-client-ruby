@@ -31,6 +31,7 @@ module Beanstalk
       @addr = addr
       @jptr = jptr
       connect
+      @last_used = 'default'
     end
 
     def connect
@@ -93,8 +94,9 @@ module Beanstalk
     end
 
     def use(tube)
+      return tube if tube == @last_used
       @socket.write("use #{tube}\r\n")
-      check_resp('USING')[0]
+      @last_used = check_resp('USING')[0]
     end
 
     def watch(tube)
