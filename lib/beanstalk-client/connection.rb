@@ -101,12 +101,12 @@ module Beanstalk
 
     def watch(tube)
       @socket.write("watch #{tube}\r\n")
-      check_resp('WATCHING')[0]
+      check_resp('WATCHING')[0].to_i
     end
 
     def ignore(tube)
       @socket.write("ignore #{tube}\r\n")
-      check_resp('WATCHING')[0]
+      check_resp('WATCHING')[0].to_i
     end
 
     def stats()
