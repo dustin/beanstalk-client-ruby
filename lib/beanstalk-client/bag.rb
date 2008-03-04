@@ -33,4 +33,8 @@ class Beanstalk::Bag
   def size()
     @items.size
   end
+
+  def each()
+    @items.each { yield }
+  end
 end
