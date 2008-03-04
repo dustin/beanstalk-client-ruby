@@ -141,7 +141,8 @@ module Beanstalk
       check_resp('USING')[0]
     end
 
-    def list_tubes_watched()
+    def list_tubes_watched(cached=false)
+      return @watch_list if cached
       @socket.write("list-tubes-watched\r\n")
       @watch_list = read_yaml('OK')
     end
