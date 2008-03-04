@@ -32,6 +32,7 @@ module Beanstalk
       @jptr = jptr
       connect
       @last_used = 'default'
+      @watch_list = ['default']
     end
 
     def connect
@@ -100,13 +101,19 @@ module Beanstalk
     end
 
     def watch(tube)
+      return @watch_list.size if @watch_list.include?(tube)
       @socket.write("watch #{tube}\r\n")
-      check_resp('WATCHING')[0].to_i
+      r = check_resp('WATCHING')[0].to_i
+      @watch_list += [tube]
+      return r
     end
 
     def ignore(tube)
+      return @watch_list.size if !@watch_list.include?(tube)
       @socket.write("ignore #{tube}\r\n")
-      check_resp('WATCHING')[0].to_i
+      r = check_resp('WATCHING')[0].to_i
+      @watch_list -= [tube]
+      return r
     end
 
     def stats()
@@ -136,7 +143,7 @@ module Beanstalk
 
     def list_tubes_watched()
       @socket.write("list-tubes-watched\r\n")
-      read_yaml('OK')
+      @watch_list = read_yaml('OK')
     end
 
     private
