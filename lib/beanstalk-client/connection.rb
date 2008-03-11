@@ -19,12 +19,11 @@ require 'socket'
 require 'fcntl'
 require 'yaml'
 require 'set'
-require 'beanstalk-client/bag'
 require 'beanstalk-client/errors'
 require 'beanstalk-client/job'
 
 module Beanstalk
-  class RawConnection
+  class Connection
     attr_reader :addr
 
     def initialize(addr, jptr=self)
@@ -186,82 +185,6 @@ module Beanstalk
       raise EOFError, 'End of file reached' if str == nil
       raise EOFError, 'End of file reached' if str.size < n
       str
-    end
-  end
-
-  # Same interface as RawConnection.
-  # With this you can reserve more than one job at a time.
-  class Connection
-    attr_reader :addr
-
-    def initialize(addr, jptr=self)
-      @addr, @jptr = addr, jptr
-      @watch_list = Set['default']
-      @misc = make_raw_conn
-      @free = Bag.new{make_raw_conn}
-      @used = {}
-    end
-
-    def reserve()
-      c = @free.take()
-      j = c.reserve()
-      @used[j.id] = c
-      j
-    ensure
-      give(c) if c and not j
-    end
-
-    def delete(id)
-      @used[id].delete(id)
-      give(@used.delete(id))
-    end
-
-    def release(id, pri, delay)
-      @used[id].release(id, pri, delay)
-      give(@used.delete(id))
-    end
-
-    def bury(id, pri)
-      @used[id].bury(id, pri)
-      give(@used.delete(id))
-    end
-
-    def method_missing(selector, *args, &block)
-      @misc.send(selector, *args, &block)
-    end
-
-    # Ugh. The Connection/RawConnection thing has to go away. Because of things
-    # like this gross hack.
-
-    def watch(tube)
-      @watch_list += [tube]
-      @misc.watch(tube)
-      @free.each{|f| f.watch(tube)}
-    end
-
-    def ignore(tube)
-      @watch_list -= [tube]
-      @misc.ignore(tube)
-      @free.each{|f| f.ignore(tube)}
-    end
-
-    private
-
-    def give(rc)
-      update_watch_list(rc)
-      @free.give(rc)
-    end
-
-    def make_raw_conn
-      rc = RawConnection.new(@addr, @jptr)
-      update_watch_list(rc)
-      rc
-    end
-
-    def update_watch_list(rc)
-      ignore_list = Set[*rc.list_tubes_watched(true)] - @watch_list
-      @watch_list.each{|t| rc.watch(t)}
-      ignore_list.each{|t| rc.ignore(t)}
     end
   end
 
