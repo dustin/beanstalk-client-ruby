@@ -30,4 +30,7 @@ module Beanstalk
 
   class DrainingError < UnexpectedResponse
   end
+
+  class WaitingForJobError < RuntimeError
+  end
 end

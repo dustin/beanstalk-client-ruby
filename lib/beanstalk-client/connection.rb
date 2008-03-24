@@ -67,10 +67,18 @@ module Beanstalk
     end
 
     def reserve()
+      raise WaitingForJobError if @waiting
       @socket.write("reserve\r\n")
 
-      # Give the user a chance to select on multiple fds.
-      Beanstalk.select.call([@socket]) if Beanstalk.select
+      begin
+        @waiting = true
+        # Give the user a chance to select on multiple fds.
+        Beanstalk.select.call([@socket]) if Beanstalk.select
+      rescue WaitingForJobError
+        # just continue
+      ensure
+        @waiting = false
+      end
 
       Job.new(@jptr, *read_job('RESERVED'))
     end
@@ -137,6 +145,7 @@ module Beanstalk
     private
 
     def interact(cmd, rfmt)
+      raise WaitingForJobError if @waiting
       @socket.write(cmd)
       return read_yaml('OK') if rfmt == :yaml
       return Job.new(@jptr, *read_job('FOUND')) if rfmt == :job
