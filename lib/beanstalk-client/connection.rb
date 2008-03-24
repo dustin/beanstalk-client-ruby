@@ -72,6 +72,10 @@ module Beanstalk
 
     def reserve()
       @socket.write("reserve\r\n")
+
+      # Give the user a chance to select on multiple fds.
+      Beanstalk.select.call([@socket]) if Beanstalk.select
+
       Job.new(@jptr, *read_job('RESERVED'))
     end
 
@@ -164,9 +168,6 @@ module Beanstalk
     end
 
     def read_job(word)
-      # Give the user a chance to select on multiple fds.
-      Beanstalk.select.call([@socket]) if Beanstalk.select
-
       id, bytes = check_resp(word).map{|s| s.to_i}
       body = read_bytes(bytes)
       raise 'bad trailer' if read_bytes(2) != "\r\n"
