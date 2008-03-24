@@ -48,8 +48,8 @@ module Beanstalk
     end
 
     def put(body, pri=65536, delay=0, ttr=120)
-      @socket.write("put #{pri} #{delay} #{ttr} #{body.size}\r\n#{body}\r\n")
-      check_resp('INSERTED', 'BURIED')[0].to_i
+      interact("put #{pri} #{delay} #{ttr} #{body.size}\r\n#{body}\r\n",
+               %w(INSERTED BURIED))[0].to_i
     end
 
     def yput(obj, pri=65536, delay=0, ttr=120)
@@ -57,17 +57,13 @@ module Beanstalk
     end
 
     def peek()
-      @socket.write("peek\r\n")
-      begin
-        Job.new(@jptr, *read_job('FOUND'))
-      rescue UnexpectedResponse
-        nil
-      end
+      interact("peek\r\n", :job)
+    rescue UnexpectedResponse
+      nil
     end
 
     def peek_job(id)
-      @socket.write("peek #{id}\r\n")
-      Job.new(@jptr, *read_job('FOUND'))
+      interact("peek #{id}\r\n", :job)
     end
 
     def reserve()
@@ -80,77 +76,72 @@ module Beanstalk
     end
 
     def delete(id)
-      @socket.write("delete #{id}\r\n")
-      check_resp('DELETED')
+      interact("delete #{id}\r\n", %w(DELETED))
       :ok
     end
 
     def release(id, pri, delay)
-      @socket.write("release #{id} #{pri} #{delay}\r\n")
-      check_resp('RELEASED')
+      interact("release #{id} #{pri} #{delay}\r\n", %w(RELEASED))
       :ok
     end
 
     def bury(id, pri)
-      @socket.write("bury #{id} #{pri}\r\n")
-      check_resp('BURIED')
+      interact("bury #{id} #{pri}\r\n", %w(BURIED))
       :ok
     end
 
     def use(tube)
       return tube if tube == @last_used
-      @socket.write("use #{tube}\r\n")
-      @last_used = check_resp('USING')[0]
+      @last_used = interact("use #{tube}\r\n", %w(USING))[0]
     end
 
     def watch(tube)
       return @watch_list.size if @watch_list.include?(tube)
-      @socket.write("watch #{tube}\r\n")
-      r = check_resp('WATCHING')[0].to_i
+      r = interact("watch #{tube}\r\n", %w(WATCHING))[0].to_i
       @watch_list += [tube]
       return r
     end
 
     def ignore(tube)
       return @watch_list.size if !@watch_list.include?(tube)
-      @socket.write("ignore #{tube}\r\n")
-      r = check_resp('WATCHING')[0].to_i
+      r = interact("ignore #{tube}\r\n", %w(WATCHING))[0].to_i
       @watch_list -= [tube]
       return r
     end
 
     def stats()
-      @socket.write("stats\r\n")
-      read_yaml('OK')
+      interact("stats\r\n", :yaml)
     end
 
     def job_stats(id)
-      @socket.write("stats-job #{id}\r\n")
-      read_yaml('OK')
+      interact("stats-job #{id}\r\n", :yaml)
     end
 
     def stats_tube(tube)
-      @socket.write("stats-tube #{tube}\r\n")
-      read_yaml('OK')
+      interact("stats-tube #{tube}\r\n", :yaml)
     end
 
     def list_tubes()
-      @socket.write("list-tubes\r\n")
-      read_yaml('OK')
+      interact("list-tubes\r\n", :yaml)
     end
 
     def list_tube_used()
-      @socket.write("list-tube-used\r\n")
-      check_resp('USING')[0]
+      interact("list-tube-used\r\n", %w(USING))[0]
     end
 
     def list_tubes_watched(cached=false)
       return @watch_list if cached
-      @socket.write("list-tubes-watched\r\n")
-      @watch_list = read_yaml('OK')
+      @watch_list = interact("list-tubes-watched\r\n", :yaml)
     end
 
     private
+
+    def interact(cmd, rfmt)
+      @socket.write(cmd)
+      return read_yaml('OK') if rfmt == :yaml
+      return Job.new(@jptr, *read_job('FOUND')) if rfmt == :job
+      check_resp(*rfmt)
+    end
 
     def get_resp()
       r = @socket.gets("\r\n")
