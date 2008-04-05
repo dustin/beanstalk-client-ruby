@@ -301,7 +301,9 @@ module Beanstalk
 
     def close
       while @connections.size > 0
-        addr, conn = @connections.pop
+        addr = @connections.keys.last
+        conn = @connections[addr]
+        @connections.delete(addr)
         conn.close
       end
     end
