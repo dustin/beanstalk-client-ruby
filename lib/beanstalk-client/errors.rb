@@ -20,15 +20,24 @@ module Beanstalk
   end
 
   class UnexpectedResponse < RuntimeError
-    def self.new(word)
-      if self == UnexpectedResponse and word == 'DRAINING'
-        return DrainingError.new(nil)
+    def self.subclasses
+      @classes ||= []
+    end
+
+    def self.inherited(subclass)
+      subclasses << subclass
+    end
+
+    def self.classify(word, message)
+      for clas in subclasses
+        return clas.new(message) if clas::WORD == word
       end
-      super(word)
+      return new(message)
     end
   end
 
   class DrainingError < UnexpectedResponse
+    WORD = 'DRAINING'
   end
 
   class WaitingForJobError < RuntimeError

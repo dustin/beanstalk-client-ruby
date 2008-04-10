@@ -164,7 +164,7 @@ module Beanstalk
       r = get_resp()
       rword, *vals = r.split(/\s+/)
       if (words.size > 0) and !words.include?(rword)
-        raise UnexpectedResponse.new(r)
+        raise UnexpectedResponse.classify(rword, r)
       end
       vals
     end
