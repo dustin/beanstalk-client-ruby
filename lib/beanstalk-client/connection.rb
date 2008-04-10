@@ -242,7 +242,7 @@ module Beanstalk
     end
 
     def send_to_all_conns(sel, *args)
-      make_hash(@connections.map{|a, c| [a, wrap(c, sel, *args)]})
+      compact_hash(make_hash(@connections.map{|a, c| [a, wrap(c, sel, *args)]}))
     end
 
     def put(body, pri=65536, delay=0, ttr=120)
@@ -318,6 +318,10 @@ module Beanstalk
       nil
     end
 
+    def peek_job(id)
+      make_hash(send_to_all_conns(:peek_job, id))
+    end
+
     private
 
     def pick_connection()
@@ -336,6 +340,10 @@ module Beanstalk
 
     def make_hash(pairs)
       Hash[*pairs.inject([]){|a,b|a+b}]
+    end
+
+    def compact_hash(hash)
+      hash.reject{|k,v| v == nil}
     end
 
     def sum_hashes(hs)
