@@ -58,14 +58,10 @@ module Beanstalk
 
     def peek()
       interact("peek\r\n", :job)
-    rescue NotFoundError
-      nil
     end
 
     def peek_job(id)
       interact("peek #{id}\r\n", :job)
-    rescue NotFoundError
-      nil
     end
 
     def reserve()
@@ -150,7 +146,7 @@ module Beanstalk
       raise WaitingForJobError if @waiting
       @socket.write(cmd)
       return read_yaml('OK') if rfmt == :yaml
-      return Job.new(@jptr, *read_job('FOUND')) if rfmt == :job
+      return found_job if rfmt == :job
       check_resp(*rfmt)
     end
 
@@ -167,6 +163,12 @@ module Beanstalk
         raise UnexpectedResponse.classify(rword, r)
       end
       vals
+    end
+
+    def found_job()
+      Job.new(@jptr, *read_job('FOUND'))
+    rescue NotFoundError
+      nil
     end
 
     def read_job(word)
