@@ -237,14 +237,6 @@ module Beanstalk
       @last_conn.addr
     end
 
-    def send_to_rand_conn(sel, *args)
-      wrap(pick_connection, sel, *args)
-    end
-
-    def send_to_all_conns(sel, *args)
-      compact_hash(make_hash(@connections.map{|a, c| [a, wrap(c, sel, *args)]}))
-    end
-
     def put(body, pri=65536, delay=0, ttr=120)
       send_to_rand_conn(:put, body, pri, delay, ttr)
     end
@@ -323,6 +315,14 @@ module Beanstalk
     end
 
     private
+
+    def send_to_rand_conn(sel, *args)
+      wrap(pick_connection, sel, *args)
+    end
+
+    def send_to_all_conns(sel, *args)
+      compact_hash(make_hash(@connections.map{|a, c| [a, wrap(c, sel, *args)]}))
+    end
 
     def pick_connection()
       open_connections[rand(open_connections.size)] or raise NotConnected
