@@ -312,12 +312,16 @@ module Beanstalk
       end
     end
 
-    def peek()
-      open_connections.each do |c|
-        job = c.peek
-        return job if job
-      end
-      nil
+    def peek_ready()
+      send_to_each_conn_first_res(:peek_ready)
+    end
+
+    def peek_delayed()
+      send_to_each_conn_first_res(:peek_delayed)
+    end
+
+    def peek_buried()
+      send_to_each_conn_first_res(:peek_buried)
     end
 
     def peek_job(id)
@@ -325,6 +329,14 @@ module Beanstalk
     end
 
     private
+
+    def send_to_each_conn_first_res(sel, *args)
+      open_connections.each do |c|
+        x = wrap(c, sel, *args)
+        return x if x
+      end
+      nil
+    end
 
     def send_to_rand_conn(sel, *args)
       wrap(pick_connection, sel, *args)
