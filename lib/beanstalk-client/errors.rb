@@ -40,6 +40,10 @@ module Beanstalk
     WORD = 'DRAINING'
   end
 
+  class NotFoundError < UnexpectedResponse
+    WORD = 'NOT_FOUND'
+  end
+
   class WaitingForJobError < RuntimeError
   end
 end

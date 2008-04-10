@@ -58,13 +58,13 @@ module Beanstalk
 
     def peek()
       interact("peek\r\n", :job)
-    rescue UnexpectedResponse
+    rescue NotFoundError
       nil
     end
 
     def peek_job(id)
       interact("peek #{id}\r\n", :job)
-    rescue UnexpectedResponse
+    rescue NotFoundError
       nil
     end
 
