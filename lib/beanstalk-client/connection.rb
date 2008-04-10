@@ -56,12 +56,20 @@ module Beanstalk
       put(YAML.dump(obj), pri, delay, ttr)
     end
 
-    def peek()
-      interact("peek\r\n", :job)
-    end
-
     def peek_job(id)
       interact("peek #{id}\r\n", :job)
+    end
+
+    def peek_ready()
+      interact("peek-ready\r\n", :job)
+    end
+
+    def peek_delayed()
+      interact("peek-delayed\r\n", :job)
+    end
+
+    def peek_buried()
+      interact("peek-buried\r\n", :job)
     end
 
     def reserve()
