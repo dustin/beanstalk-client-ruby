@@ -64,6 +64,8 @@ module Beanstalk
 
     def peek_job(id)
       interact("peek #{id}\r\n", :job)
+    rescue UnexpectedResponse
+      nil
     end
 
     def reserve()
