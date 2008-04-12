@@ -1,3 +1,10 @@
+== 0.10.0 2008-04-11
+
+* Some optimizations to avoid sending unnecessary use and watch commands.
+* Use newer protocol features to open only one connection per server address.
+* More consistent and complete peek methods.
+* Various bug fixes.
+
 == 0.9.0 2008-02-27
 
 * Skipping 0.8.x; beanstalkd 0.8 was a botched release.
