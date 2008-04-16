@@ -330,28 +330,8 @@ module Beanstalk
 
     private
 
-    def send_to_each_conn_first_res(sel, *args)
-      open_connections.each do |c|
-        x = wrap(c, sel, *args)
-        return x if x
-      end
-      nil
-    end
-
-    def send_to_rand_conn(sel, *args)
-      wrap(pick_connection, sel, *args)
-    end
-
-    def send_to_all_conns(sel, *args)
-      compact_hash(make_hash(@connections.map{|a, c| [a, wrap(c, sel, *args)]}))
-    end
-
-    def pick_connection()
-      open_connections[rand(open_connections.size)] or raise NotConnected
-    end
-
-    def wrap(conn, sel, *args)
-      (@last_conn = conn).send(sel, *args)
+    def wrap(*args)
+      yield
     rescue DrainingError
       # Don't reconnect -- we're not interested in this server
       retry
@@ -360,8 +340,32 @@ module Beanstalk
       retry
     end
 
+    def send_to_each_conn_first_res(*args)
+      wrap do
+        open_connections.inject(nil) {|r,c| r or (@last_conn = c).send(*args)}
+      end
+    end
+
+    def send_to_rand_conn(*args)
+      wrap{(@last_conn = pick_connection).send(*args)}
+    end
+
+    def send_to_all_conns(*args)
+      wrap do
+        compact_hash(map_hash(@connections){|c| (@last_conn = c).send(*args)})
+      end
+    end
+
+    def pick_connection()
+      open_connections[rand(open_connections.size)] or raise NotConnected
+    end
+
     def make_hash(pairs)
       Hash[*pairs.inject([]){|a,b|a+b}]
+    end
+
+    def map_hash(h)
+      make_hash(h.map{|k,v| [k, yield(v)]})
     end
 
     def compact_hash(hash)
