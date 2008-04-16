@@ -209,6 +209,7 @@ module Beanstalk
 
     def method_missing(selector, *args, &block)
       begin
+        @multi.last_conn = @conn
         @conn.send(selector, *args, &block)
       rescue EOFError, Errno::ECONNRESET, Errno::EPIPE, UnexpectedResponse => ex
         @multi.remove(@conn)
@@ -218,6 +219,8 @@ module Beanstalk
   end
 
   class Pool
+    attr_accessor :last_conn
+
     def initialize(addrs)
       @addrs = addrs
       connect()
@@ -341,19 +344,15 @@ module Beanstalk
     end
 
     def send_to_each_conn_first_res(*args)
-      wrap do
-        open_connections.inject(nil) {|r,c| r or (@last_conn = c).send(*args)}
-      end
+      wrap{open_connections.inject(nil) {|r,c| r or c.send(*args)}}
     end
 
     def send_to_rand_conn(*args)
-      wrap{(@last_conn = pick_connection).send(*args)}
+      wrap{pick_connection.send(*args)}
     end
 
     def send_to_all_conns(*args)
-      wrap do
-        compact_hash(map_hash(@connections){|c| (@last_conn = c).send(*args)})
-      end
+      wrap{compact_hash(map_hash(@connections){|c| c.send(*args)})}
     end
 
     def pick_connection()
