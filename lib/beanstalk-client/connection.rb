@@ -344,14 +344,17 @@ module Beanstalk
     end
 
     def send_to_each_conn_first_res(*args)
+      connect()
       wrap{open_connections.inject(nil) {|r,c| r or c.send(*args)}}
     end
 
     def send_to_rand_conn(*args)
+      connect()
       wrap{pick_connection.send(*args)}
     end
 
     def send_to_all_conns(*args)
+      connect()
       wrap{compact_hash(map_hash(@connections){|c| c.send(*args)})}
     end
 
