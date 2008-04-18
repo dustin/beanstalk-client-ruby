@@ -1,3 +1,7 @@
+== 0.11.0 2008-04-17
+
+* Fix an infinite loop bug when the server goes away.
+
 == 0.10.0 2008-04-11
 
 * Some optimizations to avoid sending unnecessary use and watch commands.
