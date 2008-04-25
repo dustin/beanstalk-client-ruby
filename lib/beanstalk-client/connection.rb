@@ -273,13 +273,13 @@ module Beanstalk
 
     def watch(tube)
       r = send_to_all_conns(:watch, tube)
-      @watch_list = send_to_rand_conn(:list_tubes_watched)
+      @watch_list = send_to_rand_conn(:list_tubes_watched, true)
       return r
     end
 
     def ignore(tube)
       r = send_to_all_conns(:ignore, tube)
-      @watch_list = send_to_rand_conn(:list_tubes_watched)
+      @watch_list = send_to_rand_conn(:list_tubes_watched, true)
       return r
     end
 
