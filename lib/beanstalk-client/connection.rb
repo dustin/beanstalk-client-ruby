@@ -223,6 +223,7 @@ module Beanstalk
 
     def initialize(addrs)
       @addrs = addrs
+      @watch_list = ['default']
       connect()
     end
 
@@ -233,6 +234,10 @@ module Beanstalk
           if !@connections.include?(addr)
             puts "connecting to beanstalk at #{addr}"
             @connections[addr] = CleanupWrapper.new(addr, self)
+            prev_watched = @connections[addr].list_tubes_watched()
+            to_ignore = prev_watched - @watch_list
+            @watch_list.each{|tube| @connections[addr].watch(tube)}
+            to_ignore.each{|tube| @connections[addr].ignore(tube)}
           end
         rescue Exception => ex
           puts "#{ex.class}: #{ex}"
@@ -267,11 +272,15 @@ module Beanstalk
     end
 
     def watch(tube)
-      send_to_all_conns(:watch, tube)
+      r = send_to_all_conns(:watch, tube)
+      @watch_list = send_to_rand_conn(:list_tubes_watched)
+      return r
     end
 
     def ignore(tube)
-      send_to_all_conns(:ignore, tube)
+      r = send_to_all_conns(:ignore, tube)
+      @watch_list = send_to_rand_conn(:list_tubes_watched)
+      return r
     end
 
     def raw_stats()
