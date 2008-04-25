@@ -307,8 +307,8 @@ module Beanstalk
       send_to_all_conns(:list_tube_used)
     end
 
-    def list_tubes_watched()
-      send_to_all_conns(:list_tubes_watched)
+    def list_tubes_watched(*args)
+      send_to_all_conns(:list_tubes_watched, *args)
     end
 
     def remove(conn)
