@@ -26,12 +26,14 @@ module Beanstalk
   class Connection
     attr_reader :addr
 
-    def initialize(addr, jptr=self)
+    def initialize(addr, jptr=self, default_tube=nil)
       @addr = addr
       @jptr = jptr
       connect
       @last_used = 'default'
-      @watch_list = ['default']
+      @watch_list = [@last_used]
+      self.use(default_tube) if default_tube
+      self.watch(default_tube) if default_tube
     end
 
     def connect
@@ -202,8 +204,8 @@ module Beanstalk
   end
 
   class CleanupWrapper
-    def initialize(addr, multi)
-      @conn = Connection.new(addr, self)
+    def initialize(addr, multi, default_tube=nil)
+      @conn = Connection.new(addr, self, default_tube)
       @multi = multi
     end
 
@@ -221,9 +223,11 @@ module Beanstalk
   class Pool
     attr_accessor :last_conn
 
-    def initialize(addrs)
+    def initialize(addrs, default_tube=nil)
       @addrs = addrs
       @watch_list = ['default']
+      @default_tube=default_tube
+      @watch_list << default_tube if default_tube
       connect()
     end
 
@@ -233,7 +237,7 @@ module Beanstalk
         begin
           if !@connections.include?(addr)
             puts "connecting to beanstalk at #{addr}"
-            @connections[addr] = CleanupWrapper.new(addr, self)
+            @connections[addr] = CleanupWrapper.new(addr, self, @default_tube)
             prev_watched = @connections[addr].list_tubes_watched()
             to_ignore = prev_watched - @watch_list
             @watch_list.each{|tube| @connections[addr].watch(tube)}
