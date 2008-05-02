@@ -227,7 +227,7 @@ module Beanstalk
       @addrs = addrs
       @watch_list = ['default']
       @default_tube=default_tube
-      @watch_list << default_tube if default_tube
+      @watch_list = [default_tube] if default_tube
       connect()
     end
 
