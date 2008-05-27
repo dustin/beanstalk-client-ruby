@@ -44,6 +44,10 @@ module Beanstalk
     WORD = 'NOT_FOUND'
   end
 
+  class DeadlineSoonError < UnexpectedResponse
+    WORD = 'DEADLINE_SOON'
+  end
+
   class WaitingForJobError < RuntimeError
   end
 end
