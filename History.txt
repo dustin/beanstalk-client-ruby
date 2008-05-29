@@ -1,3 +1,11 @@
+== 1.0.0 2008-05-29
+
+* Preserve the watch list when a Pool instance reconnects.
+* Allow user to get the cached list of tubes watched for a Pool.
+* Allow user to specify a default tube for all connections. (Dustin Sallings)
+* Added a gemspec for github. (Dustin Sallings)
+* More exception classes, including one for each server error response.
+
 == 0.11.0 2008-04-17
 
 * Fix an infinite loop bug when the server goes away.
