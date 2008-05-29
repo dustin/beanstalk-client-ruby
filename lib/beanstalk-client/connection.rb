@@ -109,6 +109,8 @@ module Beanstalk
     def use(tube)
       return tube if tube == @last_used
       @last_used = interact("use #{tube}\r\n", %w(USING))[0]
+    rescue BadFormatError
+      raise InvalidTubeName.new(tube)
     end
 
     def watch(tube)
@@ -116,6 +118,8 @@ module Beanstalk
       r = interact("watch #{tube}\r\n", %w(WATCHING))[0].to_i
       @watch_list += [tube]
       return r
+    rescue BadFormatError
+      raise InvalidTubeName.new(tube)
     end
 
     def ignore(tube)

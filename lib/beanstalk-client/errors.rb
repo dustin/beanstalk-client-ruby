@@ -78,4 +78,7 @@ module Beanstalk
 
   class WaitingForJobError < RuntimeError
   end
+
+  class InvalidTubeName < RuntimeError
+  end
 end
