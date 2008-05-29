@@ -48,6 +48,34 @@ module Beanstalk
     WORD = 'DEADLINE_SOON'
   end
 
+  class NotIgnoredError < UnexpectedResponse
+    WORD = 'NOT_IGNORED'
+  end
+
+  class OutOfMemoryError < UnexpectedResponse
+    WORD = 'OUT_OF_MEMORY'
+  end
+
+  class InternalError < UnexpectedResponse
+    WORD = 'INTERNAL_ERROR'
+  end
+
+  class BadFormatError < UnexpectedResponse
+    WORD = 'BAD_FORMAT'
+  end
+
+  class UnknownCommandError < UnexpectedResponse
+    WORD = 'UNKNOWN_COMMAND'
+  end
+
+  class ExpectedCRLFError < UnexpectedResponse
+    WORD = 'EXPECTED_CRLF'
+  end
+
+  class JobTooBigError < UnexpectedResponse
+    WORD = 'JOB_TOO_BIG'
+  end
+
   class WaitingForJobError < RuntimeError
   end
 end
