@@ -207,23 +207,6 @@ module Beanstalk
     end
   end
 
-  class CleanupWrapper
-    def initialize(addr, multi, default_tube=nil)
-      @conn = Connection.new(addr, self, default_tube)
-      @multi = multi
-    end
-
-    def method_missing(selector, *args, &block)
-      begin
-        @multi.last_conn = @conn
-        @conn.send(selector, *args, &block)
-      rescue EOFError, Errno::ECONNRESET, Errno::EPIPE, UnexpectedResponse => ex
-        @multi.remove(@conn)
-        raise ex
-      end
-    end
-  end
-
   class Pool
     attr_accessor :last_conn
 
@@ -241,7 +224,7 @@ module Beanstalk
         begin
           if !@connections.include?(addr)
             puts "connecting to beanstalk at #{addr}"
-            @connections[addr] = CleanupWrapper.new(addr, self, @default_tube)
+            @connections[addr] = Connection.new(addr, self, @default_tube)
             prev_watched = @connections[addr].list_tubes_watched()
             to_ignore = prev_watched - @watch_list
             @watch_list.each{|tube| @connections[addr].watch(tube)}
@@ -350,7 +333,15 @@ module Beanstalk
 
     private
 
-    def wrap(*args)
+    def call_wrap(c, *args)
+      self.last_conn = c
+      c.send(*args)
+    rescue EOFError, Errno::ECONNRESET, Errno::EPIPE, UnexpectedResponse => ex
+      self.remove(c)
+      raise ex
+    end
+
+    def retry_wrap(*args)
       yield
     rescue DrainingError
       # Don't reconnect -- we're not interested in this server
@@ -362,17 +353,17 @@ module Beanstalk
 
     def send_to_each_conn_first_res(*args)
       connect()
-      wrap{open_connections.inject(nil) {|r,c| r or c.send(*args)}}
+      retry_wrap{open_connections.inject(nil) {|r,c| r or call_wrap(c, *args)}}
     end
 
     def send_to_rand_conn(*args)
       connect()
-      wrap{pick_connection.send(*args)}
+      retry_wrap{call_wrap(pick_connection, *args)}
     end
 
     def send_to_all_conns(*args)
       connect()
-      wrap{compact_hash(map_hash(@connections){|c| c.send(*args)})}
+      retry_wrap{compact_hash(map_hash(@connections){|c| call_wrap(c, *args)})}
     end
 
     def pick_connection()
