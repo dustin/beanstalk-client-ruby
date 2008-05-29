@@ -27,6 +27,7 @@ module Beanstalk
     attr_reader :addr
 
     def initialize(addr, jptr=self, default_tube=nil)
+      @waiting = false
       @addr = addr
       @jptr = jptr
       connect
