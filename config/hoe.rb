@@ -1,7 +1,7 @@
 require 'beanstalk-client/version'
 
 AUTHOR = 'Keith Rarick'  # can also be an array of Authors
-EMAIL = 'kr@essembly.com'
+EMAIL = 'kr@causes.com'
 DESCRIPTION = 'Ruby client library for the Beanstalk protocol'
 GEM_NAME = 'beanstalk-client' # what ppl will type to install your gem
 RUBYFORGE_PROJECT = 'beanstalk' # The unix name for your project
