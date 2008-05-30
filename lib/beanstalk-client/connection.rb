@@ -26,10 +26,9 @@ module Beanstalk
   class Connection
     attr_reader :addr
 
-    def initialize(addr, jptr=self, default_tube=nil)
+    def initialize(addr, default_tube=nil)
       @waiting = false
       @addr = addr
-      @jptr = jptr
       connect
       @last_used = 'default'
       @watch_list = [@last_used]
@@ -89,7 +88,7 @@ module Beanstalk
         @waiting = false
       end
 
-      Job.new(@jptr, *read_job('RESERVED'))
+      Job.new(self, *read_job('RESERVED'))
     end
 
     def delete(id)
@@ -181,7 +180,7 @@ module Beanstalk
     end
 
     def found_job()
-      Job.new(@jptr, *read_job('FOUND'))
+      Job.new(self, *read_job('FOUND'))
     rescue NotFoundError
       nil
     end
@@ -225,7 +224,7 @@ module Beanstalk
         begin
           if !@connections.include?(addr)
             puts "connecting to beanstalk at #{addr}"
-            @connections[addr] = Connection.new(addr, self, @default_tube)
+            @connections[addr] = Connection.new(addr, @default_tube)
             prev_watched = @connections[addr].list_tubes_watched()
             to_ignore = prev_watched - @watch_list
             @watch_list.each{|tube| @connections[addr].watch(tube)}
