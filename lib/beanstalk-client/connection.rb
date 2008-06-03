@@ -223,7 +223,6 @@ module Beanstalk
       @addrs.each do |addr|
         begin
           if !@connections.include?(addr)
-            puts "connecting to beanstalk at #{addr}"
             @connections[addr] = Connection.new(addr, @default_tube)
             prev_watched = @connections[addr].list_tubes_watched()
             to_ignore = prev_watched - @watch_list
