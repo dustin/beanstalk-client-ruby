@@ -74,9 +74,13 @@ module Beanstalk
       interact("peek-buried\r\n", :job)
     end
 
-    def reserve()
+    def reserve(timeout=nil)
       raise WaitingForJobError if @waiting
-      @socket.write("reserve\r\n")
+      if timeout.nil?
+        @socket.write("reserve\r\n")
+      else
+        @socket.write("reserve-with-timeout #{timeout}\r\n")
+      end
 
       begin
         @waiting = true

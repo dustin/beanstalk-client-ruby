@@ -76,6 +76,10 @@ module Beanstalk
     WORD = 'JOB_TOO_BIG'
   end
 
+  class TimedOut < UnexpectedResponse
+    WORD = 'TIMED_OUT'
+  end
+
   class WaitingForJobError < RuntimeError
   end
 
