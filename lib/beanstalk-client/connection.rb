@@ -257,8 +257,8 @@ module Beanstalk
       send_to_rand_conn(:yput, obj, pri, delay, ttr)
     end
 
-    def reserve()
-      send_to_rand_conn(:reserve)
+    def reserve(timeout=nil)
+      send_to_rand_conn(:reserve, timeout)
     end
 
     def use(tube)
