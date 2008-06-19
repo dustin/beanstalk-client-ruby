@@ -1,3 +1,15 @@
+== 1.0.2 2008-06-18
+
+* Support reserve-with-timeout on pools. (Dustin Sallings)
+
+== 1.0.1 (never released)
+
+* Fix bug preventing jobs from being deleted.
+* Remove an extraneous message. (Dustin Sallings)
+* Fix the github gemspec so beanstalk-client builds. (Isaac Feliu)
+* Support the new reserve-with-timeout command in dev beanstalkd.
+  (Dustin Sallings)
+
 == 1.0.0 2008-05-29
 
 * Preserve the watch list when a Pool instance reconnects.
