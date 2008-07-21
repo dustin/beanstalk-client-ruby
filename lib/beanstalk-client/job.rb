@@ -53,15 +53,15 @@ class Beanstalk::Job
     @conn.put(body, pri, delay, ttr)
   end
 
-  def release(newpri=pri, delay=0)
+  def release(newpri=nil, delay=0)
     return if !@reserved
-    @conn.release(id, newpri, delay)
+    @conn.release(id, newpri || pri, delay)
     @reserved = false
   end
 
-  def bury(newpri=pri)
+  def bury(newpri=nil)
     return if !@reserved
-    @conn.bury(id, newpri)
+    @conn.bury(id, newpri || pri)
     @reserved = false
   end
 
