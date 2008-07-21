@@ -194,7 +194,7 @@ module Beanstalk
       id, bytes = check_resp(word).map{|s| s.to_i}
       body = read_bytes(bytes)
       raise 'bad trailer' if read_bytes(2) != "\r\n"
-      [id, body]
+      [id, body, word == 'RESERVED']
     end
 
     def read_yaml(word)
