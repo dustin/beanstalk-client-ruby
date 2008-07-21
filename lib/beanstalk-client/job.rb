@@ -36,16 +36,17 @@ class Beanstalk::Job
     (@ybody ||= [begin YAML.load(body) rescue nil end])[0]
   end
 
-  def initialize(conn, id, body)
+  def initialize(conn, id, body, reserved=true)
     @conn = conn
     @id = id
     @body = body
-    @deleted = false
+    @reserved = reserved
   end
 
   def delete()
-    @conn.delete(id) if !@deleted
-    @deleted = true
+    return if !@reserved
+    @conn.delete(id)
+    @reserved = false
   end
 
   def put_back(pri=self.pri, delay=0, ttr=self.ttr)
@@ -53,11 +54,15 @@ class Beanstalk::Job
   end
 
   def release(newpri=pri, delay=0)
+    return if !@reserved
     @conn.release(id, newpri, delay)
+    @reserved = false
   end
 
   def bury(newpri=pri)
+    return if !@reserved
     @conn.bury(id, newpri)
+    @reserved = false
   end
 
   def stats()
