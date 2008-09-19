@@ -111,6 +111,10 @@ module Beanstalk
       :ok
     end
 
+    def kick(n)
+      interact("kick #{n}\r\n", %w(KICKED))[0].to_i
+    end
+
     def use(tube)
       return tube if tube == @last_used
       @last_used = interact("use #{tube}\r\n", %w(USING))[0]
