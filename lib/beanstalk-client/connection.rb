@@ -50,6 +50,9 @@ module Beanstalk
     end
 
     def put(body, pri=65536, delay=0, ttr=120)
+      pri = pri.to_i
+      delay = delay.to_i
+      ttr = ttr.to_i
       body = body.to_s # Make sure that body.size gives a useful number
       interact("put #{pri} #{delay} #{ttr} #{body.size}\r\n#{body}\r\n",
                %w(INSERTED BURIED))[0].to_i
@@ -102,6 +105,9 @@ module Beanstalk
     end
 
     def release(id, pri, delay)
+      id = id.to_i
+      pri = pri.to_i
+      delay = delay.to_i
       interact("release #{id} #{pri} #{delay}\r\n", %w(RELEASED))
       :ok
     end
