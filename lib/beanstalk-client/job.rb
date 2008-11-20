@@ -65,6 +65,11 @@ class Beanstalk::Job
     @reserved = false
   end
 
+  def touch
+    return if !@reserved
+    @conn.touch(id)
+  end
+
   def stats()
     @conn.job_stats(id)
   end

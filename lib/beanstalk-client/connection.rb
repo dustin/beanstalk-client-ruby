@@ -117,6 +117,11 @@ module Beanstalk
       :ok
     end
 
+    def touch(id)
+      interact("touch #{id}\r\n", %w(TOUCHED))
+      :ok
+    end
+
     def kick(n)
       interact("kick #{n}\r\n", %w(KICKED))[0].to_i
     end
